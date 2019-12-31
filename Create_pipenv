@@ -1,0 +1,7 @@
+#---create pip environment---#
+//from Terminal
+
+pipenv --three //uses Python3 to create PipFile
+pipenv install boto3
+pipenv install -d ipython //CTRL+D to exit
+pipenv run ipython

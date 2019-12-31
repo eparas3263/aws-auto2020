@@ -1,0 +1,114 @@
+#---Verify AWS CLI is configured w/cred---#
+aws configure list //from Terminal
+aws configure --profile <profile name>
+   e.g. aws configure --profile pythonAutomation
+cat ~/.aws/config //display config file
+
+
+#--setup session---#
+import boto3
+session =boto3.Session(profile_name ='pythonAutomation')
+s3 = session.resource('s3')
+
+#---loop through s3 buckets---#
+for bucket in s3.buckets.all():
+    print(bucket)
+
+#---How to save command line history from ipython to an external file---#
+get_ipython().run_line_magic('history', '')
+get_ipython().run_line_magic('save', 'ipython123019.py 1-20')
+
+#---get region_name---#
+session.region_name
+
+#---Create new s3 bucket with LocationConstraint---#
+new_bucket =s3.create_bucket(Bucket='003-autoaws-ecparas', CreateBucketConfiguration ={'LocationConstraint':session.region_name})
+
+#upload file to s3 with extra arguments
+s3.Bucket('001-autoaws-ecparas').upload_file('index.html', 'index.html', ExtraArgs ={'ContentType': 'text/html'})
+
+
+#set bucket policy to public (JSON)
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "PublicReadGetObject",
+            "Effect": "Allow",
+            "Principal": "*",
+            "Action": "s3:GetObject",
+            "Resource": "arn:aws:s3:::003-autoaws-ecparas/*"
+        }
+    ]
+}
+#Replace bucket with placeholder %s
+
+policy = """
+    ...: {
+    ...:     "Version": "2012-10-17",
+    ...:     "Statement": [
+    ...:         {
+    ...:             "Sid": "PublicReadGetObject",
+    ...:             "Effect": "Allow",
+    ...:             "Principal": "*",
+    ...:             "Action": "s3:GetObject",
+    ...:             "Resource": "arn:aws:s3:::%s/*"
+    ...:         }
+    ...:     ]
+    ...: }
+    ...: """ % new_bucket.name
+
+print(policy)
+
+#---Create bucket policy---#
+pol = new_bucket.Policy() //reference the object
+
+#---Fix the JSON error to remove whitespace chars from string---#
+policy = policy.strip()
+
+#---apply policy to objects---#
+pol.put(Policy=policy)
+
+#---Successful output---#
+Out[20]:
+{'ResponseMetadata': {'RequestId': '2A0FE50BB7A22B63',
+  'HostId': 'vMs5dapvVSNip+1/VUsBd045/x8JPaBFzw8C3pq5E2IqKm7uDE0MCoQSGZ5BDdXftgZ4UzphKP0=',
+  'HTTPStatusCode': 204, //<---20x code = success
+  'HTTPHeaders': {'x-amz-id-2': 'vMs5dapvVSNip+1/VUsBd045/x8JPaBFzw8C3pq5E2IqKm7uDE0MCoQSGZ5BDdXftgZ4UzphKP0=',
+   'x-amz-request-id': '2A0FE50BB7A22B63',
+   'date': 'Tue, 31 Dec 2019 13:25:42 GMT',
+   'server': 'AmazonS3'},
+  'RetryAttempts': 0}}
+
+  #---Setup website Config---#
+  ws = new_bucket.Website() //reference object
+  ws.put(WebsiteConfiguration={
+    'ErrorDocument': {'Key': 'error.html'},
+    'IndexDocument': {'Suffix': 'index.html'},
+})
+
+{'ResponseMetadata': {'RequestId': '7A3B6374F87F0433',
+  'HostId': 'nVp1BJVvFcGrEcsm21RF1PSID1AZkPsZ2WVmSZXgpZA6KOwz21DZEeaRix7iq1mX8R7IMcaUsFA=',
+  'HTTPStatusCode': 200, //<----200 = success
+  'HTTPHeaders': {'x-amz-id-2': 'nVp1BJVvFcGrEcsm21RF1PSID1AZkPsZ2WVmSZXgpZA6KOwz21DZEeaRix7iq1mX8R7IMcaUsFA=',
+   'x-amz-request-id': '7A3B6374F87F0433',
+   'date': 'Tue, 31 Dec 2019 13:51:48 GMT',
+   'content-length': '0',
+   'server': 'AmazonS3'},
+  'RetryAttempts': 0}}
+
+#---Url of s3 websites using format strings %s---#
+url = "http://%s.s3-website.us-east2.amazonaws.com"% new_bucket.name
+
+
+#---Error Handling---#
+
+from botocore.exceptions import ClientError
+new_bucket = None
+try:
+    new_bucket =s3.create_bucket(Bucket='003-autoaws-ecparas', CreateBucketConfiguration ={'LocationConstraint':session.region_name})
+except ClientError as e:
+    if e.response['Error']['Code'] == 'BucketAlreadyOwnedByYou':
+        new_bucket =s3.Bucket(bucket)
+    else:
+        raise e
