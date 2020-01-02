@@ -33,7 +33,7 @@ def list_bucket_objects(bucket):
     """List more crap"""
     for obj in s3.Bucket(bucket).objects.all():
         print(obj)
-    
+    pass
 
 def upload_files(s3_bucket, path, key):
     content_type = mimetypes.guess_type(key)[0] or 'text/plain'
