@@ -1,7 +1,13 @@
 #---create pip environment---#
 //from Terminal
 
+1. cd to directory you want to create pipenv
+  cd aws-auto2020
+  cd 01-webotron
+
 pipenv --three //uses Python3 to create PipFile
 pipenv install boto3
-pipenv install -d ipython //CTRL+D to exit
+pipenv install -d ipython //CTRL+D to exit; -d installs in development env
 pipenv run ipython
+
+cat PipFile //show pipenv configuration

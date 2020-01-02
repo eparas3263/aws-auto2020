@@ -1,34 +1,84 @@
+#---create pip environment---#
+//from Terminal
+
+STEP 1: cd to directory you want to create pipenv
+        cd aws-auto2020
+        cd 01-webotron
+STEP 2:
+pipenv --three //uses Python3 to create PipFile
+pipenv install boto3
+pipenv install -d ipython //CTRL+D to exit; -d installs in development env
+pipenv run ipython
+cat PipFile //show pipenv configuration
+
 #---Verify AWS CLI is configured w/cred---#
 aws configure list //from Terminal
 aws configure --profile <profile name>
    e.g. aws configure --profile pythonAutomation
 cat ~/.aws/config //display config file
 
-
-#--setup session---#
+#--setup Session---#
 import boto3
-session =boto3.Session(profile_name ='pythonAutomation')
+session =boto3.Session(profile_name ='pythonAutomation') //capital Session
 s3 = session.resource('s3')
 
 #---loop through s3 buckets---#
 for bucket in s3.buckets.all():
     print(bucket)
 
+#---save ipython command line history---#
+%history //-list previous commands
+%save <filenam> <lines>
+      example: %save ipython123019.py 1-10
+
+#---rerun python code from history file---#
+pipenv run ipython -i <filename>
+        example: pipenv run ipython -i ipythonsession.py
+
 #---How to save command line history from ipython to an external file---#
 get_ipython().run_line_magic('history', '')
 get_ipython().run_line_magic('save', 'ipython123019.py 1-20')
+
+#--- Click module---#
+Command Line Interface Creation Kit
+- make process of writing command line tools quick and fun
+- three points:
+  - arbitrary nesting of Commands
+  - automating help page generation
+  - supports lazy loading of subcommands at runtime
+
+  Example:
+  import click
+
+  @click.command()
+  @click.option('--count', default=1, help'Number of Greetings.)
+  @click.option('--name', prompt='Your name',
+                help = 'The person to greet.')
+  def hello(count, name):
+    """Simple program that prints greeting Count number of times"""
+    for x in range(count) //-Loop
+      click.echo('Hello %s!' % name)
+
+  if __name__=='__main__': //-IF module is MIAn the run function hello
+    hello()
+
+
+
+#---Python commands----------------------------------------------------------#
 
 #---get region_name---#
 session.region_name
 
 #---Create new s3 bucket with LocationConstraint---#
-new_bucket =s3.create_bucket(Bucket='002-autoaws-ecparas', CreateBucketConfiguration ={'LocationConstraint':session.region_name})
+new_bucket =s3.create_bucket(Bucket='003-autoaws-ecparas', CreateBucketConfiguration ={'LocationConstraint':session.region_name})
+ //-LocationConstraint required when creating a bucket outside of us-east-1
 
-#upload file to s3 with extra arguments
+#---Upload file to s3 with extra arguments---#
 s3.Bucket('002-autoaws-ecparas').upload_file('01-webotron/index.html', 'index.html', ExtraArgs ={'ContentType': 'text/html'})
+s3.Bucket('003-autoaws-ecparas').upload_file('01-webotron/Cloud9-notes.xlsx', 'Cloud9-notes.xlsx')
+   //-make sure you are in the right root directory first in ipython
 
-
-#set bucket policy to public (JSON)
+#---set bucket policy to public (JSON)---#
 {
     "Version": "2012-10-17",
     "Statement": [
@@ -41,7 +91,7 @@ s3.Bucket('002-autoaws-ecparas').upload_file('01-webotron/index.html', 'index.ht
         }
     ]
 }
-#Replace bucket with placeholder %s
+#---Replace bucket with placeholder %s---#
 
 policy = """
     ...: {
