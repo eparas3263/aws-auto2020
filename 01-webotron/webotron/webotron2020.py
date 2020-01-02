@@ -102,6 +102,37 @@ def setup_bucket(bucket):
 #s3.Bucket('004-autoaws-ecparas').upload_file('01-webotron/index.html', 'index.html', ExtraArgs ={'ContentType': 'text/html'})
 
 
+#---S3 Sync---#
+
+#---python---#
+#---example code: webotron sync kitten_web kittens.automatingaws.net---#
+pathname = "kitten_web"
+path = Path(pathname)
+path.resolve()         #-shows full path-#
+
+
+#---sample function---#
+def handle_directory(target):
+  for p in target.iterdir():
+    if p.is_dir(): handle_directory(p) #-recursive calls itself
+    if p.is_file(): print(p)
+
+
+#---cli group option 4---#
+@cli.command('sync')
+@click.argument('pathname', type=click.Path(exists=True))
+def sync(pathname):
+    """Sync contents of PATHNAME to BUCKET"""
+    #s3_bucket =s3.Bucket(bucket)
+    root = Path(pathname).expanduser().resolve()
+
+    def handle_directory(target):
+        for p in target.iterdir():
+            if p.is_dir(): handle_directory(p)
+            if p.is_file(): upload_file(s3_bucket, str(p), str(p.relative_to(root)))
+
+    handle_directory(root) #---alignment matters---#
+
 if __name__=='__main__':
     cli()                #-call the click group-
 
@@ -115,3 +146,5 @@ if __name__=='__main__':
 #python webotron/webotron.py --help   (generate help msgs via click module)
 #python webotron/webotron2020.py list-buckets
 #print(policy)
+#handle_directory(path)
+#handle_directory(path.expanduser())---> expands tilde directory reference

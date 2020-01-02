@@ -4,11 +4,12 @@ pathlib module //helps translate code for windows
 
 #---python---#
 from pathlib import Path   //import individual library
-# webotron sync kitten_web kittens.automatingaws.net //example Code
+#---example code: webotron sync kitten_web kittens.automatingaws.net---#
 
 pathname = "kitten_web"
 path = Path(pathname)
-path.resolve()
+path.resolve()         #-shows full path-#
+
 
 #---iterate contents of path---#
 list(path.iterdir()) //same as ls command
@@ -19,10 +20,12 @@ path.is_file() is file?
 #---sample function---#
 def handle_directory(target):
   for p in target.iterdir():
-    if p.is_dir(): handle_directory(p) //recursive call own function
-    if p.is_file(): print(p.as_posix) //show path in mac format
+    if p.is_dir(): handle_directory(p) #-recursive calls itself
+    if p.is_file(): print(p.as_posix)  #-show path in mac format while on windows
+    if p.is_file(): print(p)
 
-    // might get stuck in loop when using symbolic links
+
+    #-might get stuck in loop when using symbolic links
 
 #---Example with home directory path--#
 pathname ="~/aws-auto2020/01-webotron/kitten_web/"
@@ -34,7 +37,7 @@ path.expanduser()
 #---Relative to example---#
 root = pathname
 path.relative_to(root)
-// PosixPath('.')
+#- returns PosixPath('.')-#
 
 #---Example Error---#
 path.relative_to(root)
@@ -55,6 +58,23 @@ ValueError: '/Users/eparas3263/aws-auto2020/01-webotron/kitten_web/images/Baline
 root
 Out[30]: '~/aws-auto2020/01-webotron/kitten_web/' //conflicts with value in path variable
 
+
+In [81]: path
+Out[81]: PosixPath('/Users/ecparas/aws-auto2020/01-webotron/kitten_web/images/Maine_coon_kitten_roarie.jpg')
+
+In [82]: root
+Out[82]: '~/aws-auto2020/01-webotron/kitten_web/'
+
+In [83]: root = '/Users/ecparas/aws-auto2020/01-webotron/kitten_web/'  #-replace tilde with fulll home directory path to match path variable-#
+
+In [84]: root
+Out[84]: '/Users/ecparas/aws-auto2020/01-webotron/kitten_web/'
+
+In [85]: path.relative_to(root)
+Out[85]: PosixPath('images/Maine_coon_kitten_roarie.jpg')
+
+In [86]:
+
 #---change root path---#
 root ='/Users/eparas3263/aws-auto2020/01-webotron/kitten_web/'
 
@@ -74,12 +94,10 @@ def handle_directory(target):
     if p.is_dir(): handle_directory(p)
     if p.is_file(): print("Path: {}\n Key: {}".format(p, p.relative_to(root)))
 
-handle_directory(root)
+handle_directory(root) #-throws error- AttributeError: 'str' object has no attribute 'iterdir' -#
 
-
-
-
-handle_directory(Path(root)) //turns root in a path
+#--fix--#
+handle_directory(Path(root)) #-turns root in a path
 
 In [39]: handle_directory(Path(root))
 Path: /Users/eparas3263/aws-auto2020/01-webotron/kitten_web/index.html
