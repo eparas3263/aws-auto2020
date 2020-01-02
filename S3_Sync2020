@@ -1,3 +1,109 @@
 #---S3 Sync---#
 
 pathlib module //helps translate code for windows
+
+#---python---#
+from pathlib import Path   //import individual library
+# webotron sync kitten_web kittens.automatingaws.net //example Code
+
+pathname = "kitten_web"
+path = Path(pathname)
+path.resolve()
+
+#---iterate contents of path---#
+list(path.iterdir()) //same as ls command
+
+path.is_dir() //is directory?
+path.is_file() is file?
+
+#---sample function---#
+def handle_directory(target):
+  for p in target.iterdir():
+    if p.is_dir(): handle_directory(p) //recursive call own function
+    if p.is_file(): print(p.as_posix) //show path in mac format
+
+    // might get stuck in loop when using symbolic links
+
+#---Example with home directory path--#
+pathname ="~/aws-auto2020/01-webotron/kitten_web/"
+path = Path(pathname)
+ // path = PosixPath('~/aws-auto2020/01-webotron/kitten_web')
+path.expanduser()
+// PosixPath('/Users/eparas3263/aws-auto2020/01-webotron/kitten_web')
+
+#---Relative to example---#
+root = pathname
+path.relative_to(root)
+// PosixPath('.')
+
+#---Example Error---#
+path.relative_to(root)
+---------------------------------------------------------------------------
+ValueError                                Traceback (most recent call last)
+<ipython-input-29-387dcdf45ab4> in <module>
+----> 1 path.relative_to(root)
+
+/usr/local/Cellar/python/3.7.6/Frameworks/Python.framework/Versions/3.7/lib/python3.7/pathlib.py in relative_to(self, *other)
+    893             formatted = self._format_parsed_parts(to_drv, to_root, to_parts)
+    894             raise ValueError("{!r} does not start with {!r}"
+--> 895                              .format(str(self), str(formatted)))
+    896         return self._from_parsed_parts('', root if n == 1 else '',
+    897                                        abs_parts[n:])
+
+ValueError: '/Users/eparas3263/aws-auto2020/01-webotron/kitten_web/images/Balinese-kitten1.jpg' does not start with '~/aws-auto2020/01-webotron/kitten_web'
+
+root
+Out[30]: '~/aws-auto2020/01-webotron/kitten_web/' //conflicts with value in path variable
+
+#---change root path---#
+root ='/Users/eparas3263/aws-auto2020/01-webotron/kitten_web/'
+
+path.relative_to(root)
+Out[37]: PosixPath('images/Balinese-kitten1.jpg') //returns path all after root path
+
+\\ '/Users/eparas3263/aws-auto2020/01-webotron/kitten_web/images/Balinese-kitten1.jpg'
+\\ {------------------root------------------------------}{--relative to leftover----}
+
+#---modify handler function with relative_to---#
+#---enclosure---#
+root = Path(pathname).expanduser().resolve()
+
+
+def handle_directory(target):
+  for p in target.iterdir():
+    if p.is_dir(): handle_directory(p)
+    if p.is_file(): print("Path: {}\n Key: {}".format(p, p.relative_to(root)))
+
+handle_directory(root)
+
+
+
+
+handle_directory(Path(root)) //turns root in a path
+
+In [39]: handle_directory(Path(root))
+Path: /Users/eparas3263/aws-auto2020/01-webotron/kitten_web/index.html
+ Key: index.html
+Path: /Users/eparas3263/aws-auto2020/01-webotron/kitten_web/css/main.css
+ Key: css/main.css
+Path: /Users/eparas3263/aws-auto2020/01-webotron/kitten_web/images/Balinese-kitten1.jpg
+ Key: images/Balinese-kitten1.jpg
+Path: /Users/eparas3263/aws-auto2020/01-webotron/kitten_web/images/Maine_coon_kitten_roarie.jpg
+ Key: images/Maine_coon_kitten_roarie.jpg
+Path: /Users/eparas3263/aws-auto2020/01-webotron/kitten_web/images/SFSPCA_Kitten.jpg
+ Key: images/SFSPCA_Kitten.jpg
+
+#---upload_file function---#
+def upload_files(s3_bucket, path, key):
+  s3_bucket.upload_file(
+    path,
+    key,
+    ExtraArgs={
+      'ContentType': 'text/html'
+    })
+
+#---Determine ContentType based on filename---#
+import mimetypes
+\\ mimetype? will lookup documentation
+mimetypes.guess_type('index.html')
+Out[3]: ('text/html', None)

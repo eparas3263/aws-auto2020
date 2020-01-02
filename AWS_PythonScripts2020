@@ -22,10 +22,10 @@ get_ipython().run_line_magic('save', 'ipython123019.py 1-20')
 session.region_name
 
 #---Create new s3 bucket with LocationConstraint---#
-new_bucket =s3.create_bucket(Bucket='003-autoaws-ecparas', CreateBucketConfiguration ={'LocationConstraint':session.region_name})
+new_bucket =s3.create_bucket(Bucket='002-autoaws-ecparas', CreateBucketConfiguration ={'LocationConstraint':session.region_name})
 
 #upload file to s3 with extra arguments
-s3.Bucket('001-autoaws-ecparas').upload_file('index.html', 'index.html', ExtraArgs ={'ContentType': 'text/html'})
+s3.Bucket('002-autoaws-ecparas').upload_file('01-webotron/index.html', 'index.html', ExtraArgs ={'ContentType': 'text/html'})
 
 
 #set bucket policy to public (JSON)
