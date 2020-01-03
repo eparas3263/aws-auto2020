@@ -47,6 +47,7 @@ Command Line Interface Creation Kit
   - automating help page generation
   - supports lazy loading of subcommands at runtime
 
+
   Example:
   import click
 
@@ -162,3 +163,10 @@ except ClientError as e:
         new_bucket =s3.Bucket(bucket)
     else:
         raise e
+
+#---Refactoring Code Tools---#
+pipenv install -d pycodestyle
+Ex: pycodestyle webotron/webotron.py
+
+pipenv install -d pydocstyle
+pipenv install -d pylint
