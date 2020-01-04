@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 import mimetypes
 from pathlib import Path
+from botocore.exceptions import ClientError
 
 """Clases for S3 Buckets"""  # -denote docstrings with 3x quotes
 
@@ -9,7 +10,8 @@ class BucketManager:
     """Manage an S3 Bucket."""
     def __init__(self,session):
         """Create a BucketManager object."""
-        self.s3 = session.resource('s3')
+        self.session = session
+        self.s3 = session.resource('s3') # - allow access to S3 resources - #
 
     def all_buckets(self):
         """Iterator for all buckets."""
@@ -28,7 +30,7 @@ class BucketManager:
                 CreateBucketConfiguration ={'LocationConstraint': self.session.region_name})
         except ClientError as e:
             if error.response['Error']['Code'] == 'BucketAlreadyOwnedByYou':
-                s3_bucket = self.s3.Bucket(bucket)
+                s3_bucket = self.s3.Bucket(bucket_name)
             else:
                 raise error
 
@@ -61,8 +63,7 @@ class BucketManager:
     def configure_website(self, bucket):
 
             # ---Setup website Configuration---#
-            ws = bucket.Website()
-            ws.put(WebsiteConfiguration={
+            bucket.Website().put(WebsiteConfiguration={
                     'ErrorDocument': {
                     'Key': 'error.html'
                     },
@@ -70,24 +71,24 @@ class BucketManager:
                         'Suffix': 'index.html'
                     }})
             return
-    @staticmethod
+    @staticmethod   # - doesn't rely on BucketManager object -#
     def upload_file(bucket, path, key):
             content_type = mimetypes.guess_type(key)[0] or 'text/plain'
             bucket.upload_file(
                 path,
                 key,
                 ExtraArgs={
-                  'ContentType': 'text/html'
+                  'ContentType': content_type
                 })
 
     def sync(self, pathname, bucket_name):
-       bucket = self.s3.Bucket(bucket)
+       bucket = self.s3.Bucket(bucket_name)
        root = Path(pathname).expanduser().resolve()
 
        def handle_directory(target):
            for p in target.iterdir():
                if p.is_dir(): handle_directory(p)
-               if p.is_file(): self.upload_file(s3_bucket, str(p), str(p.relative_to(root)))
+               if p.is_file(): self.upload_file(bucket, str(p), str(p.relative_to(root)))
 
        handle_directory(root)   # ---alignment matters---#
 # ---TWASK--- #

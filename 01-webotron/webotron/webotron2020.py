@@ -6,14 +6,12 @@
 # ---Import modules---#
 
 import boto3
-from botocore.exceptions import ClientError
 import click
-from botocore.exceptions import ClientError
-from bucket import BucketManager
+from bucket import BucketManager    # ---from bucket.py --- #
 
 # ---Establish Session---#
-session = boto3.Session(profile_name='pythonAutomation')
-bucket_manager = BucketManager(session)
+session = boto3.Session(profile_name='pythonAWSauto')
+bucket_manager = BucketManager(session)  # ---captures s3 session --- #swee
 
 
 # ---CLICK commands---#
@@ -48,40 +46,12 @@ def setup_bucket(bucket):
 
 
 
-    # ---Error Handling---#
-
-
-
-# ---Url of s3 websites using format strings %s---#
-# url = "http://%s.s3-website.us-east2.amazonaws.com"% new_bucket.name
-
-# ---Upload file to s3 with extra arguments---#
-# s3.Bucket('004-autoaws-ecparas').upload_file('01-webotron/index.html', 'index.html', ExtraArgs ={'ContentType': 'text/html'})
-
-
-# ---S3 Sync---#
-
-# ---python---#
-# ---example code: webotron sync kitten_web kittens.automatingaws.net---#
-pathname = "kitten_web"
-path = Path(pathname)
-path.resolve()         #-shows full path-#
-
-
-#---sample function---#
-def handle_directory(target):
-  for p in target.iterdir():
-    if p.is_dir(): handle_directory(p) #-recursive calls itself
-    if p.is_file(): print(p)
-
-
 # ---cli group option 4---#
 @cli.command('sync')
 @click.argument('pathname', type=click.Path(exists=True))
 @click.argument('bucket')
-def sync(self, pathname, bucket_name):
+def sync(pathname, bucket):
     """Sync contents of PATHNAME to BUCKET"""
-    bucket =self.s3.Bucket(bucket)
     bucket_manager.sync(pathname, bucket)
 
 
